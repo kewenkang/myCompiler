@@ -1,0 +1,11 @@
+int z=0x12;
+m = 2+3*4;
+int[2][4] h;    /*multidimensio
+nal array declaration*/
+int[3] a;       /*array_declaration*/
+a[0] = 2;       /*assignment_and reference of array*/
+while(m>2 || m<0)      /*loop_statement*/
+do
+if(m<8)  	/*nested_branch_statements*/
+then m = m +1;
+else m = m*2;  //tyerterte
