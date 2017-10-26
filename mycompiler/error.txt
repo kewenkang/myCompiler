@@ -1,0 +1,9 @@
+int z=0x;       /*unfinished HEX*/
+int o=09;       /*wrong OCT*/
+float f = 1.2
+float d = 1e  /*error*/
+m = 2+3*4;
+int[2][4] h;    /*multidimensional array declaration*/
+string s = "qwer; /*unfinished string*/
+char c = 'a;   /*unfinished char*/
+/** this is error note/

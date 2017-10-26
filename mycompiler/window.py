@@ -37,8 +37,7 @@ class MyWidget(QtGui.QWidget):
         self.textEdit = QtGui.QTextEdit(self)
         self.textEdit.setGeometry(10,10,580, 680)
 
-
-
+    # 窗口居中
     def center(self):
         screen = QtGui.QDesktopWidget().screenGeometry()
         size = self.geometry()
@@ -79,16 +78,23 @@ class MainWindow(QtGui.QMainWindow):
         # lexer toolbar
         self.dfa_table = QtGui.QAction('词法规则', self)
         self.dfa_table.setShortcut('Ctrl+D')
-        self.dfa_table.setStatusTip("lexer")
         self.connect(self.dfa_table, QtCore.SIGNAL('triggered()'), self.show_dfa_table)
+
+        # paser toolbar
+        self.paser = QtGui.QAction('语法分析', self)
+        self.paser.setShortcut('Ctrl+P')
+        self.paser.setStatusTip("paser")
+        self.connect(self.paser, QtCore.SIGNAL('triggered()'), self.paser_ana)
 
         # add toolbar
         self.toolbar1 = self.addToolBar("打开文件")
         self.toolbar2 = self.addToolBar("词法分析")
         self.toolbar3 = self.addToolBar("词法规则")
+        self.toolbar4 = self.addToolBar("语法分析")
         self.toolbar1.addAction(self.openfile)
         self.toolbar2.addAction(self.lexer)
         self.toolbar3.addAction(self.dfa_table)
+        self.toolbar4.addAction(self.paser)
 
         # add status bar
         self.statusBar().showMessage('Ready')
@@ -98,26 +104,22 @@ class MainWindow(QtGui.QMainWindow):
         file = menubar.addMenu("&File")
         file.addAction(self.exit)
 
-        #
+        # 中央文本框
         self.textEdit = QtGui.QTextEdit()
         self.setCentralWidget(self.textEdit)
         self.setFocus()
 
 
-
-
-
-
     def open_file(self):
+        # 文件选择器
         filename = QtGui.QFileDialog.getOpenFileName(self, "Open file", '.')
-        print(filename)
+        print("open"+filename)
         fname = open(filename, 'r')
         data = fname.read()
         self.textEdit.setText(data)
 
-        print("open")
-
     def lexer_ana(self):
+        # 获取文本框内容
         data = self.textEdit.toPlainText()
 
         tokens = self.l.lex(data)
@@ -135,11 +137,14 @@ class MainWindow(QtGui.QMainWindow):
         self.dfa_table_widget.table(chars, states, t_content)
         self.dfa_table_widget.show()
 
+    def paser_ana(self):
+        print("paser")
+        pass
 
+if __name__ == "__main__":
+    app = QtGui.QApplication(sys.argv)
 
-app = QtGui.QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
 
-window = MainWindow()
-window.show()
-
-sys.exit(app.exec_())
+    sys.exit(app.exec_())

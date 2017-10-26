@@ -12,54 +12,34 @@ class Lexer():
             words = line.split(" ")
             self.keywords = words
 
-    def analyze(self, word, line_num=0):
+    def analyze(self, word):
         '''
-        analyze every splited word
-        :param word:
-        :return:
+        :param word: 待分析内容
+        :return: token序列
         '''
-        def output(s1, t):
-            if s1 == 1:
-                print("<DEC,", t, ">")
-            elif s1 == 2:
-                print("<DEC,", 0,">")
-            elif s1 == 3:
-                print("unfinished HEX")
-            elif s1 == 4:
-                print("<OCT,", t, ">")
-            elif s1 == 5:
-                print("<HEX,", t, ">")
-            elif s1 == 6:
-                if t in self.keywords:
-                    print("<" + t, ", _ >")
-                else:
-                    print("<IDF,", t, ">")
-            elif s1 in [11, 12, 13, 14, 15, 16, 17, 22]:
-                print("<" + t, ", _ >")
-            elif s1 in [25]:
-                print("<NOTE,", t, ">")
-
+        # 构造token属性值
         def output1(s1, t, line_num):
-            ret_token_str = str(line_num) + '\t'
-            if s1 == 1:
-                ret_token_str += "<DEC,"+ t+ ">"
-            elif s1 == 2:
-                ret_token_str += "<DEC, 0 >"
+            ret_token_str = str(line_num) + '\t'+t+"\t"
+            if s1 in [1, 2, 4, 5, 29]:
+                ret_token_str += "<CONST,"+ t+ ">"
             elif s1 == 3:
-                ret_token_str += "unfinished HEX"
-            elif s1 == 4:
-                ret_token_str += "<OCT,"+ t+ ">"
-            elif s1 == 5:
-                ret_token_str += "<HEX,"+ t+ ">"
+                ret_token_str += "error: unfinished HEX"
+
             elif s1 == 6:
                 if t in self.keywords:
                     ret_token_str += "<" + t+ ", _ >"
                 else:
-                    ret_token_str += "<IDF,"+ t+ ">"
+                    ret_token_str += "<IDN,"+ t+ ">"
             elif s1 in [11, 12, 13, 14, 15, 16, 17, 22]:
                 ret_token_str += "<" + t+ ", _ >"
             elif s1 in [25, 26]:
-                ret_token_str += "<NOTE,"+ t+ ">"
+                ret_token_str = str(line_num) + '\t'+"/**/\t"+ "<NOTE,"+ t+ ">"
+            elif s1 in [18, 21, 33]:
+                ret_token_str += "<CONST,"+t+">"
+            elif s1 == 30:
+                ret_token_str += 'wrong OCT or HEX: ' + t
+            else:
+                ret_token_str += 'error: '+ t
             return ret_token_str
 
         token = ''
@@ -102,25 +82,10 @@ class Lexer():
             words = blank.split(line.strip())
 
             for w in words:
-                tokens.extend(self.analyze(w, line_num))
-        return tokens
-
-    def lex_lines(self, content):
-        lines = content.strip().split('\n')
-        tokens = []
-
-        for i in range(len(lines)):
-            line_num = i+1
-            line = lines[i]
-            # blank = re.compile("[ \t]+")
-            # words = blank.split(line.strip())
-            #
-            # for w in words:
-            tokens.extend(self.analyze(line, line_num))
+                tokens.extend(self.analyze(w))
         return tokens
 
     def lex(self, content):
-
         tokens = self.analyze(content)
         return tokens
 
@@ -135,17 +100,18 @@ if __name__=='__main__':
 
 
     content = ''
-    with open("example.txt", 'r', encoding='utf8') as f:
+    with open("error.txt", 'r', encoding='utf8') as f:
         for line in f:
             content += line
     # print(content)
-
+    # content = "float f_p = 1.1212e1"
     tokens = l.lex(content)
     for t in tokens:
         print(t)
     # def xxx():
     #     for i in range(10):
     #         yield i
+
     # x = xxx()
     # for i in x:
     #     print(i)
