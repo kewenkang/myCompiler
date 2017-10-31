@@ -1,7 +1,7 @@
+from PyQt4 import QtGui,QtCore
 import sys
-from PyQt4 import QtGui, QtCore
-from util import *
-from Lexer import *
+from lexer.Lexer import Lexer
+
 
 class MyTable(QtGui.QTableWidget):
     def __init__(self, title):

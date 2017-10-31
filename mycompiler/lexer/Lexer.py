@@ -1,46 +1,66 @@
 # -*- coding: utf-8 -*-
-import DFA
 import re
+
+from lexer import DFA
+
 
 class Lexer():
     def __init__(self):
         self.dfa = DFA.DFA1()
         self.keywords = None
-        keywords_file = "keywords"
+        keywords_file = "lexer/keywords"
         with open(keywords_file, 'r') as k:
             line = k.readline()
             words = line.split(" ")
             self.keywords = words
 
-    def analyze(self, word):
+    def output1(self, s1, t, line_num):
+        ret_token_str = str(line_num) + '\t' + t + "\t"
+        if s1 in [1, 2, 4, 5, 29]:
+            ret_token_str += "<CONST," + t + ">"
+        elif s1 == 3:
+            ret_token_str += "error: unfinished HEX"
+
+        elif s1 == 6:
+            if t in self.keywords:
+                ret_token_str += "<" + t + ", _ >"
+            else:
+                ret_token_str += "<IDN," + t + ">"
+        elif s1 in [11, 12, 13, 14, 15, 16, 17, 22]:
+            ret_token_str += "<" + t + ", _ >"
+        elif s1 in [25, 26]:
+            ret_token_str = str(line_num) + '\t' + "/**/\t" + "<NOTE," + t + ">"
+        elif s1 in [18, 21, 33]:
+            ret_token_str += "<CONST," + t + ">"
+        elif s1 == 30:
+            ret_token_str += 'wrong OCT or HEX: ' + t
+        else:
+            ret_token_str += 'error: ' + t
+        return ret_token_str
+
+    def output(self, s1, t, line_num):
+        ret_token_str = ''
+        if s1 in [1, 2, 4, 5, 29]:
+            ret_token_str += "CONST\t" + t
+        elif s1 == 6:
+            if t in self.keywords:
+                ret_token_str += t + "\t-"
+            else:
+                ret_token_str += "IDN\t" + t
+        elif s1 in [11, 12, 13, 14, 15, 16, 17, 22]:
+            ret_token_str += t + "\t-"
+        elif s1 in [18, 21, 33]:
+            ret_token_str += "CONST\t" + t
+
+        return ret_token_str
+
+    def analyze(self, word, out="output1"):
         '''
         :param word: 待分析内容
         :return: token序列
         '''
         # 构造token属性值
-        def output1(s1, t, line_num):
-            ret_token_str = str(line_num) + '\t'+t+"\t"
-            if s1 in [1, 2, 4, 5, 29]:
-                ret_token_str += "<CONST,"+ t+ ">"
-            elif s1 == 3:
-                ret_token_str += "error: unfinished HEX"
-
-            elif s1 == 6:
-                if t in self.keywords:
-                    ret_token_str += "<" + t+ ", _ >"
-                else:
-                    ret_token_str += "<IDN,"+ t+ ">"
-            elif s1 in [11, 12, 13, 14, 15, 16, 17, 22]:
-                ret_token_str += "<" + t+ ", _ >"
-            elif s1 in [25, 26]:
-                ret_token_str = str(line_num) + '\t'+"/**/\t"+ "<NOTE,"+ t+ ">"
-            elif s1 in [18, 21, 33]:
-                ret_token_str += "<CONST,"+t+">"
-            elif s1 == 30:
-                ret_token_str += 'wrong OCT or HEX: ' + t
-            else:
-                ret_token_str += 'error: '+ t
-            return ret_token_str
+        out = getattr(self, out)
 
         token = ''
         s = 0
@@ -63,11 +83,11 @@ class Lexer():
                 c_next = word[i + 1]
                 s_next = self.dfa.move(s, c_next)
                 if s != 0 and s_next == 0:
-                    tokens.append(output1(s, token, line_idx))
+                    tokens.append(out(s, token, line_idx))
                     token = ''
                     s = 0
             else:
-                tokens.append(output1(s, token, line_idx))
+                tokens.append(out(s, token, line_idx))
             i = i+1
         return tokens
 
@@ -86,7 +106,7 @@ class Lexer():
         return tokens
 
     def lex(self, content):
-        tokens = self.analyze(content)
+        tokens = self.analyze(content, out="output1")
         return tokens
 
 if __name__=='__main__':
@@ -100,7 +120,7 @@ if __name__=='__main__':
 
 
     content = ''
-    with open("error.txt", 'r', encoding='utf8') as f:
+    with open("example.txt", 'r', encoding='utf8') as f:
         for line in f:
             content += line
     # print(content)
